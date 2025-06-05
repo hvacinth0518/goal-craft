@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 AI 教學目標產生器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 30px;
+            padding: 30px;
+            min-height: 600px;
+        }
+
+        .input-section {
+            background: #f8faff;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e1e8ff;
+        }
+
+        .input-section h3 {
+            color: #4facfe;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ff;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .generate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .display-section {
+            background: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e8e8e8;
+        }
+
+        .display-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .goal-item {
+            background: #f9f9f9;
+            border-left: 4px solid #4facfe;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            position: relative;
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .goal-type {
+            font-weight: 600;
+            color: #4facfe;
+            font-size: 1.1em;
+        }
+
+        .bloom-tag {
+            background: #e1f5fe;
+            color: #0277bd;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .goal-content {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .goal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .info-section {
+            background: #f0f8ff;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e1e8ff;
+        }
+
+        .info-section h3 {
+            color: #4facfe;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .competency-list {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .competency-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .competency-item:last-child {
+            border-bottom: none;
+        }
+
+        .competency-code {
+            background: #4facfe;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .export-section {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .export-btn {
+            width: 100%;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 AI 教學目標產生器</h1>
+            <p>快速產生符合課綱的明確教學目標，提升備課效率</p>
+        </div>
+
+        <div class="main-content">
+            <!-- 左側輸入區 -->
+            <div class="input-section">
+                <h3>📘 課程資訊輸入</h3>
+                
+                <div class="success-message" id="successMessage"></div>
+                <div class="error-message" id="errorMessage"></div>
+
+                <form id="courseForm">
+                    <div class="form-group">
+                        <label for="courseTitle">課程主題 *</label>
+                        <input type="text" id="courseTitle" name="courseTitle" 
+                               placeholder="例：Unit 1 - Introducing Yourself" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="learningPoints">學習重點 *</label>
+                        <textarea id="learningPoints" name="learningPoints" 
+                                  placeholder="例：能用英文介紹姓名、年齡、國籍" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="educationLevel">教育階段</label>
+                        <select id="educationLevel" name="educationLevel">
+                            <option value="elementary">國小</option>
+                            <option value="junior">國中</option>
+                            <option value="senior" selected>高中</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">科目</label>
+                        <select id="subject" name="subject">
+                            <option value="chinese">國文</option>
+                            <option value="english" selected>英文</option>
+                            <option value="math">數學</option>
+                            <option value="science">自然科學</option>
+                            <option value="social">社會</option>
+                            <option value="arts">藝術</option>
+                            <option value="pe">體育</option>
+                            <option value="tech">科技</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="generate-btn" id="generateBtn">
+                        ✨ 產生教學目標
+                    </button>
+                </form>
+            </div>
+
+            <!-- 中央顯示區 -->
+            <div class="display-section">
+                <h3>📋 教學目標</h3>
+                
+                <div class="loading" id="loadingDiv">
+                    <div class="spinner"></div>
+                    <p>AI 正在為您產生教學目標...</p>
+                </div>
+
+                <div class="empty-state" id="emptyState">
+                    <div style="font-size: 4em; margin-bottom: 20px;">📝</div>
+                    <h4>尚未產生教學目標</h4>
+                    <p>請在左側輸入課程資訊，點擊「產生教學目標」開始使用</p>
+                </div>
+
+                <div id="goalsContainer" style="display: none;">
+                    <div class="goal-item" id="cognitiveGoal">
+                        <div class="goal-header">
+                            <div class="goal-type">🧠 認知層面</div>
+                            <div class="bloom-tag" id="cognitiveBloom">理解</div>
+                        </div>
+                        <div class="goal-content" id="cognitiveContent">
+                            學生能理解介紹自我與國籍的基本句型
+                        </div>
+                        <div class="goal-actions">
+                            <button class="action-btn" onclick="editGoal('cognitive')">✏️ 編輯</button>
+                            <button class="action-btn" onclick="regenerateGoal('cognitive')">🔁 重新產生</button>
+                        </div>
+                    </div>
+
+                    <div class="goal-item" id="skillGoal">
+                        <div class="goal-header">
+                            <div class="goal-type">🛠️ 技能層面</div>
+                            <div class="bloom-tag" id="skillBloom">應用</div>
+                        </div>
+                        <div class="goal-content" id="skillContent">
+                            學生能用英文正確介紹自己的國籍與背景
+                        </div>
+                        <div class="goal-actions">
+                            <button class="action-btn" onclick="editGoal('skill')">✏️ 編輯</button>
+                            <button class="action-btn" onclick="regenerateGoal('skill')">🔁 重新產生</button>
+                        </div>
+                    </div>
+
+                    <div class="goal-item" id="affectiveGoal">
+                        <div class="goal-header">
+                            <div class="goal-type">❤️ 情意層面</div>
+                            <div class="bloom-tag" id="affectiveBloom">評鑑</div>
+                        </div>
+                        <div class="goal-content" id="affectiveContent">
+                            學生能樂於與他人互動並表達自我
+                        </div>
+                        <div class="goal-actions">
+                            <button class="action-btn" onclick="editGoal('affective')">✏️ 編輯</button>
+                            <button class="action-btn" onclick="regenerateGoal('affective')">🔁 重新產生</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側資訊欄 -->
+            <div class="info-section">
+                <h3>🧩 核心素養對應</h3>
+                
+                <div class="competency-list" id="competencyList">
+                    <div class="competency-item">
+                        <span>自主行動</span>
+                        <span class="competency-code">A1</span>
+                    </div>
+                    <div class="competency-item">
+                        <span>溝通互動</span>
+                        <span class="competency-code">B1</span>
+                    </div>
+                    <div class="competency-item">
+                        <span>社會參與</span>
+                        <span class="competency-code">C2</span>
+                    </div>
+                </div>
+
+                <div class="export-section">
+                    <h4 style="margin-bottom: 15px; color: #333;">📤 匯出功能</h4>
+                    <button class="export-btn" onclick="copyToClipboard()">📋 複製到剪貼簿</button>
+                    <button class="export-btn" onclick="exportToWord()">📄 下載 Word 檔</button>
+                    <button class="export-btn" onclick="exportToPDF()">📑 下載 PDF 檔</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全域變數
+        let currentGoals = {
+            cognitive: '',
+            skill: '',
+            affective: ''
+        };
+
+        // Bloom's 認知層級對應
+        const bloomLevels = {
+            cognitive: ['記憶', '理解', '應用', '分析'],
+            skill: ['應用', '分析', '評鑑', '創造'],
+            affective: ['接受', '反應', '評價', '組織', '內化']
+        };
+
+        // 核心素養對應表
+        const competencyMapping = {
+            elementary: {
+                chinese: ['A1', 'B1', 'C1'],
+                english: ['A1', 'B1', 'C2'],
+                math: ['A2', 'B1', 'C1'],
+                science: ['A2', 'B2', 'C1'],
+                social: ['A1', 'B3', 'C3'],
+                arts: ['A1', 'B3', 'C2'],
+                pe: ['A1', 'B2', 'C2'],
+                tech: ['A2', 'B2', 'C1'],
+                other: ['A1', 'B1', 'C1']
+            },
+            junior: {
+                chinese: ['A1', 'B1', 'C1'],
+                english: ['A1', 'B1', 'C2'],
+                math: ['A2', 'B1', 'C1'],
+                science: ['A2', 'B2', 'C1'],
+                social: ['A1', 'B3', 'C3'],
+                arts: ['A1', 'B3', 'C2'],
+                pe: ['A1', 'B2', 'C2'],
+                tech: ['A2', 'B2', 'C1'],
+                other: ['A1', 'B1', 'C1']
+            },
+            senior: {
+                chinese: ['A1', 'B1', 'C1'],
+                english: ['A1', 'B1', 'C2'],
+                math: ['A2', 'B1', 'C1'],
+                science: ['A2', 'B2', 'C1'],
+                social: ['A1', 'B3', 'C3'],
+                arts: ['A1', 'B3', 'C2'],
+                pe: ['A1', 'B2', 'C2'],
+                tech: ['A2', 'B2', 'C1'],
+                other: ['A1', 'B1', 'C1']
+            }
+        };
+
+        // 表單提交事件
+        document.getElementById('courseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await generateGoals();
+        });
+
+        // 產生教學目標主函數
+        async function generateGoals() {
+            const formData = new FormData(document.getElementById('courseForm'));
+            const courseTitle = formData.get('courseTitle');
+            const learningPoints = formData.get('learningPoints');
+            const educationLevel = formData.get('educationLevel');
+            const subject = formData.get('subject');
+
+            if (!courseTitle || !learningPoints) {
+                showError('請填寫必要的課程資訊');
+                return;
+            }
+
+            // 顯示載入狀態
+            showLoading(true);
+            hideError();
+
+            try {
+                // 使用 Hugging Face API 產生目標
+                const prompt = buildPrompt(courseTitle, learningPoints, educationLevel, subject);
+                const aiResponse = await callHuggingFaceAPI(prompt);
+                
+                // 解析 AI 回應（這裡假設 AI 返回格式化的文字，實際可能需更複雜解析）
+                const goals = parseAIResponse(aiResponse);
+                
+                // 更新顯示
+                updateGoalsDisplay(goals);
+                updateCompetencyMapping(educationLevel, subject);
+                
+                showSuccess('教學目標已成功產生！');
+                
+            } catch (error) {
+                console.error('生成失敗:', error);
+                showError('生成教學目標時發生錯誤，請稍後再試');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // 解析 AI 回應（簡化處理，實際需根據模型回應調整）
+        function parseAIResponse(response) {
+            // 假設 AI 返回類似格式的文字，實際需根據模型調整
+            const lines = response.split('\n').filter(line => line.trim());
+            return {
+                cognitive: lines.find(line => line.startsWith('認知:'))?.replace('認知:', '').trim() || '學生能理解課程核心概念',
+                skill: lines.find(line => line.startsWith('技能:'))?.replace('技能:', '').trim() || '學生能應用所學解決問題',
+                affective: lines.find(line => line.startsWith('情意:'))?.replace('情意:', '').trim() || '學生能展現積極學習態度'
+            };
+        }
+
+        // 更新目標顯示
+        function updateGoalsDisplay(goals) {
+            currentGoals = goals;
+            
+            document.getElementById('cognitiveContent').textContent = goals.cognitive;
+            document.getElementById('skillContent').textContent = goals.skill;
+            document.getElementById('affectiveContent').textContent = goals.affective;
+
+            // 隨機分配 Bloom's 層級（實際應該由 AI 分析決定）
+            document.getElementById('cognitiveBloom').textContent = 
+                bloomLevels.cognitive[Math.floor(Math.random() * bloomLevels.cognitive.length)];
+            document.getElementById('skillBloom').textContent = 
+                bloomLevels.skill[Math.floor(Math.random() * bloomLevels.skill.length)];
+            document.getElementById('affectiveBloom').textContent = 
+                bloomLevels.affective[Math.floor(Math.random() * bloomLevels.affective.length)];
+
+            // 顯示結果區域
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('goalsContainer').style.display = 'block';
+        }
+
+        // 更新核心素養對應
+        function updateCompetencyMapping(level, subject) {
+            const competencies = competencyMapping[level][subject];
+            const competencyNames = {
+                'A1': '身心素質與自我精進',
+                'A2': '系統思考與問題解決',
+                'A3': '規劃執行與創新應變',
+                'B1': '符號運用與溝通表達',
+                'B2': '科技資訊與媒體素養',
+                'B3': '藝術涵養與美感素養',
+                'C1': '道德實踐與公民意識',
+                'C2': '人際關係與團隊合作',
+                'C3': '多元文化與國際理解'
+            };
+
+            const competencyList = document.getElementById('competencyList');
+            competencyList.innerHTML = '';
+
+            competencies.forEach(code => {
+                const item = document.createElement('div');
+                item.className = 'competency-item';
+                item.innerHTML = `
+                    <span>${competencyNames[code]}</span>
+                    <span class="competency-code">${code}</span>
+                `;
+                competencyList.appendChild(item);
+            });
+        }
+
+        // 編輯目標
+        function editGoal(type) {
+            const contentElement = document.getElementById(`${type}Content`);
+            const currentText = contentElement.textContent;
+            
+            const newText = prompt(`編輯${type === 'cognitive' ? '認知' : type === 'skill' ? '技能' : '情意'}層面目標:`, currentText);
+            
+            if (newText && newText !== currentText) {
+                contentElement.textContent = newText;
+                currentGoals[type] = newText;
+                showSuccess('目標已更新！');
+            }
+        }
+
+        // 重新產生個別目標
+        async function regenerateGoal(type) {
+            const contentElement = document.getElementById(`${type}Content`);
+            const originalText = contentElement.textContent;
+            
+            contentElement.textContent = '重新產生中...';
+            
+            try {
+                // 使用 Hugging Face API 重新產生單一目標
+                const formData = new FormData(document.getElementById('courseForm'));
+                const prompt = buildPrompt(
+                    formData.get('courseTitle'),
+                    formData.get('learningPoints'),
+                    formData.get('educationLevel'),
+                    formData.get('subject')
+                );
+                const aiResponse = await callHuggingFaceAPI(prompt);
+                const newGoal = parseAIResponse(aiResponse)[type];
+                
+                contentElement.textContent = newGoal;
+                currentGoals[type] = newGoal;
+                
+                showSuccess(`${type === 'cognitive' ? '認知' : type === 'skill' ? '技能' : '情意'}層面目標已重新產生！`);
+                
+            } catch (error) {
+                contentElement.textContent = originalText;
+                showError('重新產生失敗，請稍後再試');
+            }
+        }
+
+        // 複製到剪貼簿
+        async function copyToClipboard() {
+            const text = formatGoalsForExport();
+            
+            try {
+                await navigator.clipboard.writeText(text);
+                showSuccess('教學目標已複製到剪貼簿！');
+            } catch (error) {
+                showError('複製失敗，請手動選取文字複製');
+            }
+        }
+
+        // 匯出為 Word
+        function exportToWord() {
+            const content = formatGoalsForExport();
+            const blob = new Blob([content], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = '教學目標.doc';
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showSuccess('Word 檔案已開始下載！');
+        }
+
+        // 匯出為 PDF
+        function exportToPDF() {
+            showError('PDF 匯出功能開發中，請先使用複製功能');
+        }
+
+        // 格式化目標文字
+        function formatGoalsForExport() {
+            const formData = new FormData(document.getElementById('courseForm'));
+            const courseTitle = formData.get('courseTitle');
+            
+            return `教學目標 - ${courseTitle}
+
+認知層面：
+${currentGoals.cognitive}
+
+技能層面：
+${currentGoals.skill}
+
+情意層面：
+${currentGoals.affective}
+
+---
+產生時間：${new Date().toLocaleString('zh-TW')}
+使用工具：AI 教學目標產生器`;
+        }
+
+        // 顯示載入狀態
+        function showLoading(show) {
+            const loadingDiv = document.getElementById('loadingDiv');
+            const generateBtn = document.getElementById('generateBtn');
+            
+            if (show) {
+                loadingDiv.classList.add('show');
+                generateBtn.disabled = true;
+                generateBtn.textContent = '⏳ 產生中...';
+            } else {
+                loadingDiv.classList.remove('show');
+                generateBtn.disabled = false;
+                generateBtn.textContent = '✨ 產生教學目標';
+            }
+        }
+
+        // 顯示成功訊息
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // 顯示錯誤訊息
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // 隱藏錯誤訊息
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // 頁面載入完成後的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCompetencyMapping('senior', 'english');
+            
+            document.getElementById('educationLevel').addEventListener('change', function() {
+                const level = this.value;
+                const subject = document.getElementById('subject').value;
+                updateCompetencyMapping(level, subject);
+            });
+
+            document.getElementById('subject').addEventListener('change', function() {
+                const level = document.getElementById('educationLevel').value;
+                const subject = this.value;
+                updateCompetencyMapping(level, subject);
+            });
+        });
+
+        // Hugging Face API 整合函數
+        async function callHuggingFaceAPI(prompt) {
+            try {
+                // 從 Render 後端獲取 token
+                const tokenResponse = await fetch('https://hf-token-backend.onrender.com/api/token');
+                if (!tokenResponse.ok) {
+                    throw new Error(`無法獲取 API token: ${tokenResponse.status}`);
+                }
+                const { token } = await tokenResponse.json();
+
+                const MODEL_URL = 'https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium';
+                const response = await fetch(MODEL_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        inputs: prompt,
+                        parameters: {
+                            max_length: 200,
+                            temperature: 0.7,
+                            do_sample: true
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API 請求失敗: ${response.status}`);
+                }
+
+                const result = await response.json();
+                return result[0].generated_text;
+
+            } catch (error) {
+                console.error('Hugging Face API 呼叫失敗:', error);
+                showError('生成教學目標失敗，請檢查網路或稍後再試');
+                throw error;
+            }
+        }
+
+        // 建構 AI 提示詞
+        function buildPrompt(courseTitle, learningPoints, educationLevel, subject) {
+            const levelMap = {
+                elementary: '國小',
+                junior: '國中', 
+                senior: '高中'
+            };
+
+            const subjectMap = {
+                chinese: '國文',
+                english: '英文',
+                math: '數學',
+                science: '自然科學',
+                social: '社會',
+                arts: '藝術',
+                pe: '體育',
+                tech: '科技',
+                other: '其他'
+            };
+
+            return `請為${levelMap[educationLevel]}${subjectMap[subject]}課程「${courseTitle}」產生教學目標。
+學習重點：${learningPoints}
+
+請產生三個層面的教學目標：
+1. 認知層面：學生能理解、分析、記憶的知識性目標
+2. 技能層面：學生能實際操作、應用、創造的能力性目標  
+3. 情意層面：學生的態度、價值觀、情感表現目標
+
+每個目標都要：
+- 以「學生能」開頭
+- 具體明確，可觀察可評量
+- 符合${levelMap[educationLevel]}學生程度
+- 對應適當的Bloom認知層級
+
+請用繁體中文回答，格式如下：
+認知：[目標內容]
+技能：[目標內容] 
+情意：[目標內容]`;
+        }
+    </script>
+</body>
+</html>
